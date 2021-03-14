@@ -9,13 +9,26 @@ Vagrant.configure("2") do |config|
 
 	config.vm.define "master" do |master|
 		master.vm.box = MASTER_IMAGE
+		master.vm.hostname = "master"
 		master.vm.network "private_network", ip:"192.168.50.2"
+		# Install avahi to allo to ping the nodes 
+		master.vm.provision "shell", inline: <<-SHELL
+			apt update --quiet
+			apt install -y --quiet avahi-daemon avahi-utils libnss-mdns
+		SHELL
 	end
 
 	(1..NODE_COUNT).each do |i|
 		config.vm.define "node#{i}" do |node|
 			node.vm.box = NODE_IMAGE
+			node.vm.hostname = "node#{i}"
 			node.vm.network "private_network", ip:"192.168.50.#{i+2}"
+			# Install avahi to allo to ping the nodes 
+			node.vm.provision "shell", inline: <<-SHELL
+				apt update --quiet
+				apt install -y --quiet avahi-daemon avahi-utils libnss-mdns
+			SHELL
 		end
 	end
+
 end
