@@ -15,6 +15,10 @@ Vagrant.configure("2") do |config|
 		master.vm.provision "shell", inline: <<-SHELL
 			apt update --quiet
 			apt install -y --quiet avahi-daemon avahi-utils libnss-mdns
+			apt install -y software-properties-common
+			apt-repository -y ppa:ansible/ansible
+			apt update
+			apt -y install ansible
 		SHELL
 	end
 
