@@ -7,13 +7,13 @@ NODE_COUNT = 4
 
 Vagrant.configure("2") do |config|
 
-	config.vm.define "master" do |subconfig|
-		subconfig.box = MASTER_IMAGE
+	config.vm.define "master" do |master|
+		master.vm.box = MASTER_IMAGE
 	end
 
 	(1..NODE_COUNT).each do |i|
-		config.vm.define "node#{i}" do |subconfig|
-			subconfig.box = NODE_IMAGE
+		config.vm.define "node#{i}" do |node|
+			node.vm.box = NODE_IMAGE
 		end
 	end
 end
