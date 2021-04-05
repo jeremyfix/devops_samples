@@ -1,11 +1,12 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+VAGRANTFILE_API_VERSION = "2"
 MASTER_IMAGE = "hashicorp/bionic64"
 NODE_IMAGE = "hashicorp/bionic64"
 NODE_COUNT = 4
 
-Vagrant.configure("2") do |config|
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 	config.vm.define "master" do |master|
 		master.vm.box = MASTER_IMAGE
