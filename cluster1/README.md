@@ -34,6 +34,10 @@ You can test ansible with :
 
 	ANSIBLE_HOST_KEY_CHECKING=False ansible cluster -i hosts -m ping
 
+You have to install the requirements :
+
+	ansible-galaxy install -r requirements.yml
+
 ## Installing slurm
 
 Then we install slum with the slurm ansible role
