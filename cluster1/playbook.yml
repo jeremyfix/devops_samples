@@ -1,0 +1,38 @@
+---
+
+- name: Install head
+  hosts: master
+  apt:
+      pkg: ["munge", "build-essential"]
+      state: latest
+      update_cache: true
+
+
+- name: Install SLURM on the cluster nodes
+  hosts: cluster
+  roles:
+      - marvel-nccr.slurm
+
+# - hosts: cluster
+#   become: true
+#   tasks:
+#       - name : Configure slurm
+#         template:
+#             src: templates/slurm.conf.j2
+#             dest: /etc/slurm-llnl/slurm.conf
+#             mode: 0640
+#             owner: root
+#             group: root
+#         notify:
+#             - restart slurm
+
+#   handlers:
+#       - name: restart slurm
+#         service:
+#             name: "{{ item }}"
+#             state: restarted
+#         with_items:
+#             - slurmctld
+#             - slurmd
+
+
