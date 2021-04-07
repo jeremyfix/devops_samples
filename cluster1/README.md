@@ -52,3 +52,6 @@ For some reasons, after the install, if we log on master.local  with `ssh vagran
 ## Installing open ondemand
 
 We will be using the [ood-ansible](https://github.com/OSC/ood-ansible) role.
+
+
+	ansible-playbook playbook.yml -i hosts --extra-vars=@ood.yml

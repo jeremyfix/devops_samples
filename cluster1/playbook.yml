@@ -65,3 +65,9 @@
         service:
             name: "slurmctld"
             state: restarted
+
+
+- name: Open ondemand
+  hosts: master
+  roles:
+      - ood.ansible
