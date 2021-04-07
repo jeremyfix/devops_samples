@@ -1,13 +1,4 @@
 ---
-
-# - name: Install head
-#   hosts: master
-#   apt:
-#       pkg: ["munge", "build-essential"]
-#       state: latest
-#       update_cache: true
-
-
 - name: Basic Install SLURM on the cluster nodes
   hosts: cluster
   roles:
@@ -28,6 +19,13 @@
             - "/etc/munge/munge.key"
         notify:
             - Restart munge on nodes
+      - name : Configure slurm
+        copy:
+            src: templates/slurm.conf
+            dest: /etc/slurm-llnl/slurm.conf
+            mode: 0644
+            owner: root
+            group: root
 
   handlers:
       - name: Restart munge on nodes
@@ -36,6 +34,33 @@
             state: restarted
         with_items:
             - munge
+
+- name: Clean up slurmctl and slurmd on nodes
+  become: true
+  hosts: nodes
+  tasks:
+      - name: slurmd running on nodes
+        service:
+            name: "slurmd"
+            state: started
+      - name: slurmctld stopped on nodes
+        service:
+            name: "slurmctld"
+            state: stopped
+
+- name: Clean up slurmctl and slurmd on master
+  become: true
+  hosts: master
+  tasks:
+      - name: slurmd stopped on master
+        service:
+            name: "slurmd"
+            state: stopped
+      - name: slurmctld started on master
+        service:
+            name: "slurmd"
+            state: started
+
 
 # - hosts: cluster
 #   become: true

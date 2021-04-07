@@ -6,6 +6,15 @@ MASTER_IMAGE = "hashicorp/bionic64"
 NODE_IMAGE = "hashicorp/bionic64"
 NODE_COUNT = 4
 
+$hostscript = <<-SCRIPT
+cp /etc/hosts /root && \
+echo '192.168.50.2 master' >> /etc/hosts
+echo '192.168.50.3 node1' >> /etc/hosts
+echo '192.168.50.4 node2' >> /etc/hosts
+echo '192.168.50.5 node3' >> /etc/hosts
+echo '192.168.50.6 node4' >> /etc/hosts
+SCRIPT
+
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 	config.vm.define "master" do |master|
@@ -27,6 +36,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 			mkdir -p ~/.ssh
 			echo '#{private_key}' >> ~/.ssh/id_rsa
 		", privileged: true
+		# Make the hosts file
+		master.vm.provision "shell", inline: $hostscript
 	end
 
 	(1..NODE_COUNT).each do |i|
@@ -49,6 +60,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 				mkdir -p ~/.ssh
 				echo '#{public_key}' >> ~/.ssh/authorized_keys
 			", privileged: true
+			# Make the hosts file
+			node.vm.provision "shell", inline: $hostscript
 		end
 	end
 
