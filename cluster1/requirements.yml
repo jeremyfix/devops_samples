@@ -1,2 +1,6 @@
 # Slurm role
 - src: marvel-nccr.slurm
+ 
+# Open ondemand
+- src : https://github.com/OSC/ood-ansible.git
+  name: ood.ansible
