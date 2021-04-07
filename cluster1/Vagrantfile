@@ -21,6 +21,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 		master.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "/tmp/id_rsa.pub"
 		master.vm.provision "shell", :inline =>
 		"cat /tmp/id_rsa.pub >> ~/.ssh/authorized_keys", privileged: false
+		# Copy the password less ssh key for root
+		private_key = File.read("id_rsa")
+		master.vm.provision "shell", :inline => "
+			mkdir -p ~/.ssh
+			echo '#{private_key}' >> ~/.ssh/id_rsa
+		", privileged: true
 	end
 
 	(1..NODE_COUNT).each do |i|
@@ -37,6 +43,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 			node.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "/tmp/id_rsa.pub"
 			node.vm.provision "shell", :inline =>
 			"cat /tmp/id_rsa.pub >> ~/.ssh/authorized_keys", privileged: false
+			# Copy the public key on the nodes
+			public_key = File.read("id_rsa.pub")
+			node.vm.provision :shell, :inline => "
+				mkdir -p ~/.ssh
+				echo '#{public_key}' >> ~/.ssh/authorized_keys
+			", privileged: true
 		end
 	end
 
