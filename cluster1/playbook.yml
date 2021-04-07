@@ -1,17 +1,41 @@
 ---
 
-- name: Install head
-  hosts: master
-  apt:
-      pkg: ["munge", "build-essential"]
-      state: latest
-      update_cache: true
+# - name: Install head
+#   hosts: master
+#   apt:
+#       pkg: ["munge", "build-essential"]
+#       state: latest
+#       update_cache: true
 
 
-- name: Install SLURM on the cluster nodes
+- name: Basic Install SLURM on the cluster nodes
   hosts: cluster
   roles:
       - marvel-nccr.slurm
+
+- name: Slurm setup on the cluster
+  become: true
+  hosts: nodes
+  tags: finalsetup
+  tasks:
+      - name: Copy the munge key from master to the nodes
+        synchronize: 
+            src: "{{ item }}"
+            dest: "{{ item }}"
+            mode: push
+        delegate_to: master.local
+        with_items:
+            - "/etc/munge/munge.key"
+        notify:
+            - Restart munge on nodes
+
+  handlers:
+      - name: Restart munge on nodes
+        service:
+            name: "{{ item }}"
+            state: restarted
+        with_items:
+            - munge
 
 # - hosts: cluster
 #   become: true
