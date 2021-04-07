@@ -4,7 +4,7 @@
   roles:
       - marvel-nccr.slurm
 
-- name: Slurm setup on the cluster
+- name: Slurm setup on the nodes
   become: true
   hosts: nodes
   tags: finalsetup
@@ -19,14 +19,15 @@
             - "/etc/munge/munge.key"
         notify:
             - Restart munge on nodes
-      - name : Configure slurm
+      - name : Set up slurm.conf
         copy:
             src: templates/slurm.conf
             dest: /etc/slurm-llnl/slurm.conf
             mode: 0644
             owner: root
             group: root
-
+        notify:
+            - Restart slurmd/slurmctld
   handlers:
       - name: Restart munge on nodes
         service:
@@ -34,54 +35,33 @@
             state: restarted
         with_items:
             - munge
-
-- name: Clean up slurmctl and slurmd on nodes
-  become: true
-  hosts: nodes
-  tasks:
-      - name: slurmd running on nodes
+      - name: Restart slurmd/slurmctld
         service:
             name: "slurmd"
-            state: started
-      - name: slurmctld stopped on nodes
+            state: restarted
         service:
             name: "slurmctld"
             state: stopped
 
-- name: Clean up slurmctl and slurmd on master
+- name: Slurm setup on the master
   become: true
   hosts: master
+  tags: finalsetup
   tasks:
-      - name: slurmd stopped on master
+      - name : Set up slurm.conf
+        copy:
+            src: templates/slurm.conf
+            dest: /etc/slurm-llnl/slurm.conf
+            mode: 0644
+            owner: root
+            group: root
+        notify:
+            - Restart slurmd/slurmctld
+  handlers:
+      - name: Restart slurmd/slurmctld
         service:
             name: "slurmd"
             state: stopped
-      - name: slurmctld started on master
         service:
-            name: "slurmd"
-            state: started
-
-
-# - hosts: cluster
-#   become: true
-#   tasks:
-#       - name : Configure slurm
-#         template:
-#             src: templates/slurm.conf.j2
-#             dest: /etc/slurm-llnl/slurm.conf
-#             mode: 0640
-#             owner: root
-#             group: root
-#         notify:
-#             - restart slurm
-
-#   handlers:
-#       - name: restart slurm
-#         service:
-#             name: "{{ item }}"
-#             state: restarted
-#         with_items:
-#             - slurmctld
-#             - slurmd
-
-
+            name: "slurmctld"
+            state: restarted
