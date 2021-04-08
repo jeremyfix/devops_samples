@@ -1,4 +1,4 @@
-This defines a cluster with a master and 4 nodes
+This defines a cluster with a master and 4 nodes  .... **Not yet fully functional, I will give a try to deepops which intregates the installation of slurm, openondemand, monitoring, etc...**
 
 After `vagrant up` we can ping and access them.
 
