@@ -1,0 +1,71 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = "2"
+MASTER_IMAGE = "ubuntu/focal64"
+NODE_IMAGE = "ubuntu/focal64"
+NODE_COUNT = 1
+
+$hostscript = <<-SCRIPT
+cp /etc/hosts /root && \
+echo '192.168.50.2 front' >> /etc/hosts
+echo '192.168.50.3 master' >> /etc/hosts
+echo '192.168.50.4 node1' >> /etc/hosts
+echo '192.168.50.5 node2' >> /etc/hosts
+echo '192.168.50.6 node3' >> /etc/hosts
+echo '192.168.50.7 node4' >> /etc/hosts
+SCRIPT
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+	config.vm.define "front" do |front|
+		front.vm.box = MASTER_IMAGE
+		front.vm.hostname = "front"
+		front.vm.network "private_network", ip:"192.168.50.2"
+		# Install avahi to allow to ping the nodes 
+		front.vm.provision "shell", inline: <<-SHELL
+			apt update --quiet
+			apt install -y --quiet avahi-daemon avahi-utils libnss-mdns
+            apt install -y ansible
+		SHELL
+		# Make the hosts file
+		front.vm.provision "shell", inline: $hostscript
+        # Copy the ansible inventory
+        front.vm.provision "file", 
+          source: "./ansible/etc/hosts",
+          destination: "/tmp/etc/ansible/hosts"
+        front.vm.provision "shell",
+          inline: "mv /tmp/etc/ansible/hosts /etc/ansible/hosts"
+	end
+
+	config.vm.define "master" do |master|
+		master.vm.box = MASTER_IMAGE
+		master.vm.hostname = "master"
+		master.vm.network "private_network", ip:"192.168.50.3"
+		# Install avahi to allow to ping the nodes 
+		master.vm.provision "shell", inline: <<-SHELL
+			apt update --quiet
+			apt install -y --quiet avahi-daemon avahi-utils libnss-mdns
+		SHELL
+
+		# Make the hosts file
+		master.vm.provision "shell", inline: $hostscript
+	end
+
+	(1..NODE_COUNT).each do |i|
+		config.vm.define "node#{i}" do |node|
+			node.vm.box = NODE_IMAGE
+			node.vm.hostname = "node#{i}"
+			node.vm.network "private_network", ip:"192.168.50.#{i+3}"
+			# Install avahi to allow to ping the nodes 
+			node.vm.provision "shell", inline: <<-SHELL
+				apt update --quiet
+				apt install -y --quiet avahi-daemon avahi-utils libnss-mdns
+			SHELL
+
+			# Make the hosts file
+			node.vm.provision "shell", inline: $hostscript
+		end
+	end
+
+end
