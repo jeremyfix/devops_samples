@@ -18,54 +18,60 @@ SCRIPT
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
-	config.vm.define "front" do |front|
-		front.vm.box = MASTER_IMAGE
-		front.vm.hostname = "front"
-		front.vm.network "private_network", ip:"192.168.50.2"
-		# Install avahi to allow to ping the nodes 
-		front.vm.provision "shell", inline: <<-SHELL
-			apt update --quiet
-			apt install -y --quiet avahi-daemon avahi-utils libnss-mdns
-            apt install -y ansible
-		SHELL
-		# Make the hosts file
-		front.vm.provision "shell", inline: $hostscript
-        # Copy the ansible inventory
-        front.vm.provision "file", 
-          source: "./ansible/etc/hosts",
-          destination: "/tmp/etc/ansible/hosts"
-        front.vm.provision "shell",
-          inline: "mv /tmp/etc/ansible/hosts /etc/ansible/hosts"
-	end
+  # Define the master node, i.e. the scheduler node
+  config.vm.define "master" do |master|
+    master.vm.box = MASTER_IMAGE
+    master.vm.hostname = "master"
+    master.vm.network "private_network", ip:"192.168.50.3"
+    # Install avahi to allow to ping the nodes 
+    master.vm.provision "shell", inline: <<-SHELL
+            apt update --quiet
+            apt install -y --quiet avahi-daemon avahi-utils libnss-mdns
+    SHELL
 
-	config.vm.define "master" do |master|
-		master.vm.box = MASTER_IMAGE
-		master.vm.hostname = "master"
-		master.vm.network "private_network", ip:"192.168.50.3"
-		# Install avahi to allow to ping the nodes 
-		master.vm.provision "shell", inline: <<-SHELL
-			apt update --quiet
-			apt install -y --quiet avahi-daemon avahi-utils libnss-mdns
-		SHELL
+    # Make the hosts file
+    master.vm.provision "shell", inline: $hostscript
+  end
 
-		# Make the hosts file
-		master.vm.provision "shell", inline: $hostscript
-	end
+  # Define the compute nodes
+  (1..NODE_COUNT).each do |i|
+    config.vm.define "node#{i}" do |node|
+      node.vm.box = NODE_IMAGE
+      node.vm.hostname = "node#{i}"
+      node.vm.network "private_network", ip:"192.168.50.#{i+3}"
+      # Install avahi to allow to ping the nodes 
+      node.vm.provision "shell", inline: <<-SHELL
+                apt update --quiet
+                apt install -y --quiet avahi-daemon avahi-utils libnss-mdns
+      SHELL
 
-	(1..NODE_COUNT).each do |i|
-		config.vm.define "node#{i}" do |node|
-			node.vm.box = NODE_IMAGE
-			node.vm.hostname = "node#{i}"
-			node.vm.network "private_network", ip:"192.168.50.#{i+3}"
-			# Install avahi to allow to ping the nodes 
-			node.vm.provision "shell", inline: <<-SHELL
-				apt update --quiet
-				apt install -y --quiet avahi-daemon avahi-utils libnss-mdns
-			SHELL
+      # Make the hosts file
+      node.vm.provision "shell", inline: $hostscript
+    end
+  end
+  
+  # Define the front machine, the one on which ansible
+  # is installed and from which the configuration will be deployed
+  config.vm.define 'front' do |front|
+    front.vm.box = MASTER_IMAGE
+    front.vm.network "private_network", ip: "192.168.50.2"
+    front.vm.provision "file",
+      source:"./libhwloc5_1.11.9-1_amd64.deb", 
+      destination: "/tmp/libhwloc5_1.11.9-1_amd64.deb"
+    front.vm.provision "file",
+      source:"./slurm_20.02.3-1_amd64.deb", 
+      destination: "/tmp/slurm_20.02.3-1_amd64.deb"
+    front.vm.provision "shell",
+      inline: "mkdir -p /opt/ansible/sources; mv /tmp/libhwloc5_1.11.9-1_amd64.deb /tmp/slurm_20.02.3-1_amd64.deb /opt/ansible/sources/"
 
-			# Make the hosts file
-			node.vm.provision "shell", inline: $hostscript
-		end
-	end
+    front.vm.provision :ansible_local do |ansible|
+      ansible.playbook = "ansible/reinstall.yml"
+      ansible.verbose = true
+      ansible.install == true
+      ansible.inventory_path = "inventory"
+      ansible.limit="all"
+    end
+  end
+
 
 end
