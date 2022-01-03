@@ -1,0 +1,6 @@
+---
+- name: Restart slurmctld.service
+  service: name=slurmctld state=restarted
+
+- name: Restart slurmdbd.service
+  service: name=slurmdbd state=restarted

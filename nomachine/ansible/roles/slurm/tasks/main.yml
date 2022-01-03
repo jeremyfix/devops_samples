@@ -1,0 +1,13 @@
+# Slurm configuration
+
+- name: Copy slurm configuration file
+  copy: src=etc/slurm/slurm.conf dest=/etc/slurm/slurm.conf owner=root group=root mode=0644
+
+- name: Copy slurm prolog file
+  copy: src=etc/slurm/slurm.prolog dest=/etc/slurm/slurm.prolog owner=root group=root mode=0755
+
+- name: Copy slurm taskprolog file
+  copy: src=etc/slurm/slurm.taskprolog dest=/etc/slurm/slurm.taskprolog owner=root group=root mode=0755
+
+- name: Copy slurm epilog file
+  copy: src=etc/slurm/slurm.epilog dest=/etc/slurm/slurm.epilog owner=root group=root mode=0755

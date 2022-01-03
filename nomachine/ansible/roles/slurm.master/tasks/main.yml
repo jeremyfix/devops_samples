@@ -1,0 +1,90 @@
+# Install dependencies
+
+- name: Install building utility
+  apt:
+    pkg:
+      - libmunge-dev
+      - mariadb-server
+      - libmariadbd-dev
+      - checkinstall
+      - python3-pymysql
+    state: present
+    update_cache: true
+
+# Mysql configuration
+
+# - name: Create the mysql user
+#   mysql_user:
+#     name: slurm
+#     password: slurmpass
+#     host: localhost
+#     priv: 'slurm_acct_db.*:ALL,GRANT'
+#     state: present
+
+# - name: Create the slurm_acct_db database
+#   mysql_db:
+#       name: slurm_acct_db
+#       state: present
+
+# Slurm configuration
+
+- name: Create slurm directories if they do not exist
+  file:
+    path: /etc/slurm
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Create slurm directories if they do not exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: slurm
+    group: slurm
+  loop:
+    - /var/log/slurm
+    - /var/spool/slurm
+    - /var/spool/slurm/slurmd
+    - /var/spool/slurm/slurmctld
+
+# Slurm configuration files
+
+- name: Copy slurm gpu configuration file
+  copy: src=etc/slurm/slurmdbd.conf dest=/etc/slurm/slurmdbd.conf owner=root group=root mode=0644
+  notify:
+    - Restart slurmdbd.service
+
+# Slurm service files
+
+- name: Copy slurmd service file
+  copy: src=lib/systemd/system/{{ item }} dest=/lib/systemd/system/{{ item }} owner=root group=root mode=0644
+  notify:
+    - Restart {{ item }}
+  loop:
+    - slurmdbd.service
+    - slurmctld.service
+
+- name: Create symbolic link to service file
+  file:
+    src: /lib/systemd/system/{{ item }}
+    dest: /etc/systemd/system/multi-user.target.wants/{{ item }}
+    owner: root
+    group: root
+    state: link
+  notify:
+    - Restart {{ item }}
+  loop:
+    - slurmdbd.service
+    - slurmctld.service
+
+- name: Enable slurm services
+  service:
+    name: "{{ item }}.service"
+    enabled: yes
+  loop:
+    - munge
+    - mariadb
+    - slurmdbd
+    - slurmctld

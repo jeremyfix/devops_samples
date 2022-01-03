@@ -1,0 +1,18 @@
+- hosts:
+    - slurm_master
+  become: true
+  roles:
+    # - postfix
+    # - ldap.client
+    # - ntp.master
+    - slurm.common
+    - slurm.master
+    - slurm
+
+- hosts:
+    - compute_nodes    
+  become: true
+  roles:
+      - slurm.common
+      - slurm.compute
+      - slurm

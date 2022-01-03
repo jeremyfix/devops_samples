@@ -1,0 +1,10 @@
+front ansible_connection=local
+master      ansible_host=192.168.50.3 ansible_ssh_private_key_file=/vagrant/.vagrant/machines/master/virtualbox/private_key
+node1      ansible_host=192.168.50.4 ansible_ssh_private_key_file=/vagrant/.vagrant/machines/node1/virtualbox/private_key
+node2      ansible_host=192.168.50.5 ansible_ssh_private_key_file=/vagrant/.vagrant/machines/node2/virtualbox/private_key
+
+[slurm_master]
+master
+
+[compute_nodes]
+node1
