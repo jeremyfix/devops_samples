@@ -48,10 +48,22 @@ vagrant@master:~$ srun --pty bash
 vagrant@node1:~$ 
 ```
 
-you should keep that terminal to keep your session alive.
+you should keep that terminal to keep your session alive. The above command allocated a node, started NoMachine and registered the vagrant user in the NX database.
 
+The next step is to ssh-tunnel to the node which can be done with
+
+```
+localhost:~$ ssh -i ./.vagrant/machines/master/virtualbox/private_key -p 2222 -L 4000:node1:4000 vagrant@localhost
+```
+
+The above command **must** be executed from your vagrant directory (the one where this Readme is) to be able to access the ssh key of your virtual boxes.
+
+And finally you can start the NoMachine client on your host and open a session to localhost:4000 with username `vagrant` and password `vagrant`.
+
+
+![NoMachine session running on the vagrant VM allocated with slurm](https://github.com/jeremyfix/devops_samples/blob/main/nomachine/screennomachine.png?raw=true)
 
 # TODO
 
-NoMachine was not working out of the box; some weird characters were displayed when the session opeoned. Is that due to missing window manager ?
+I had to sudo apt-get install xfce4   with a manual selection of lightdm to make this work . How to script it ?
 
