@@ -6,13 +6,14 @@
     # - ldap.client
     # - ntp.master
     - slurm.common
-    - slurm.master
     - slurm
+    - slurm.master
+    - slurm.user
 
 - hosts:
     - compute_nodes    
   become: true
   roles:
       - slurm.common
-      - slurm.compute
       - slurm
+      - slurm.compute

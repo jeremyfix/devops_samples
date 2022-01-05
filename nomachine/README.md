@@ -6,25 +6,23 @@ This has been initially developed to experiment with NoMachine.
 
 It consists of a provisioning node, slurm master node, and some compute nodes.
 
+# Prerequisites
+
+You need to have vagrant as well as a provisionner installed. On a ubuntu host, you can :
+
+	sudo apt install vagrant vagrant-virtualbox -y
+
 # Installation
 
 To start the cluster :
 
 ```
 vagrant up
-vagrant provision
 ```
 
+For some reasons, during the ansible playbook the creation of the slurm accoutn failed because the slurmd and slurmdbd services were not running ... even if the playbook contains the notify to the handlers to restart these services !
 
-To be done manually yet, during the installation:
-```
-vagrant@master:~$ sudo mysql
-MariaDB [(none)]> grant all on slurm_acct_db.* TO 'slurm'@'localhost' identified by 'slurmpass' with grant option;
-MariaDB [(none)]> create database slurm_acct_db;
-MariaDB [(none)]> quit;
-```
 
-for some reasons the munge key was different from the master and the compute nodes, saw that from the master  /var/log/slurm/slurmctld.log 
 
 I also had to manually fill in the slurm.conf specifications of the compute nodes given what I saw in the slurmd.log on the compute node. Is it possible to specify to vagrant how many CPUs to use ?
 

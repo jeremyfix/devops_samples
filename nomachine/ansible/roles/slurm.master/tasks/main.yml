@@ -16,31 +16,8 @@
 - name: Create the mysql user
   shell: |
       mysql --execute="create database slurm_acct_db;"
-      mysql --execute="grant all on *.* TO 'slurm'@'localhost' identified by 'slurm' with grant option;"
+      mysql --execute="grant all on slurm_acct_db.* TO 'slurm'@'localhost' identified by 'slurmpass' with grant option;"
   
-# Slurm configuration
-
-- name: Create slurm directories if they do not exist
-  file:
-    path: /etc/slurm
-    state: directory
-    mode: '0755'
-    owner: root
-    group: root
-
-- name: Create slurm directories if they do not exist
-  file:
-    path: "{{ item }}"
-    state: directory
-    mode: '0755'
-    owner: slurm
-    group: slurm
-  loop:
-    - /var/log/slurm
-    - /var/spool/slurm
-    - /var/spool/slurm/slurmd
-    - /var/spool/slurm/slurmctld
-
 # Slurm configuration files
 
 - name: Copy slurm gpu configuration file
@@ -81,6 +58,14 @@
     - slurmdbd
     - slurmctld
 
+- name: Start the slurm services
+  service:
+      name: "{{ item }}"
+      state: started
+  loop: 
+    - slurmdbd
+    - slurmctld
+
 - name: Define the default slurm account
   shell: |
-      sacctmgr add account demoaccount Description="Demo account"
+      sacctmgr add account demoaccount Description="Demo account" -i
