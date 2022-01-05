@@ -63,8 +63,14 @@
       name: "{{ item }}"
       state: started
   loop: 
+    - munge
+    - mariadb
     - slurmdbd
     - slurmctld
+  register: slurmservices
+  until: slurmservices.ActiveState == "active"
+  retries: 15
+  delay: 20
 
 - name: Define the default slurm account
   shell: |
