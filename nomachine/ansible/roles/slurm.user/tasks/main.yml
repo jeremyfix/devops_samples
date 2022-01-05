@@ -2,3 +2,4 @@
 - name: Register the vagrant user on slurm
   shell: |
       sacctmgr create user name=vagrant DefaultAccount=demoaccount -i
+  ignore_errors: yes
