@@ -8,3 +8,7 @@ master
 
 [compute_nodes]
 node1
+
+[slurm_hosts:children]
+slurm_master
+compute_nodes
