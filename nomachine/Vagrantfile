@@ -23,6 +23,19 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     master.vm.box = MASTER_IMAGE
     master.vm.hostname = "master"
     master.vm.network "private_network", ip:"192.168.50.3"
+    # Provision the ssh key
+    master.vm.provision "file",
+      source: "./id_rsa", 
+      destination: "~/.ssh/id_rsa"
+    master.vm.provision "file",
+      source: "./id_rsa.pub", 
+      destination: "~/.ssh/id_rsa.pub"
+    master.vm.provision "shell",
+      privileged: false,
+      inline: <<-SHELL
+        chmod 0600 ~/.ssh/id_rsa
+        cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+    SHELL
     # Install avahi to allow to ping the nodes 
     master.vm.provision "shell", inline: <<-SHELL
             apt update --quiet
@@ -39,18 +52,22 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       node.vm.box = NODE_IMAGE
       node.vm.hostname = "node#{i}"
       node.vm.network "private_network", ip:"192.168.50.#{i+3}"
+      # Provision the ssh key
       node.vm.provision "file",
         source: "./id_rsa", 
         destination: "~/.ssh/id_rsa"
       node.vm.provision "file",
         source: "./id_rsa.pub", 
         destination: "~/.ssh/id_rsa.pub"
-      node.vm.provision "shell", inline: <<-SHELL
+      node.vm.provision "shell",
+        privileged: false,
+        inline: <<-SHELL
         chmod 0600 ~/.ssh/id_rsa
         cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
       SHELL
       # Install avahi to allow to ping the nodes 
-      node.vm.provision "shell", inline: <<-SHELL
+      node.vm.provision "shell", 
+        inline: <<-SHELL
                 apt update --quiet
                 apt install -y --quiet avahi-daemon avahi-utils libnss-mdns
       SHELL
