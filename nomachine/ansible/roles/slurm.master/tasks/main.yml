@@ -67,10 +67,13 @@
     - mariadb
     - slurmdbd
     - slurmctld
-  register: slurmservices
-  until: slurmservices.ActiveState == "active"
-  retries: 15
-  delay: 20
+
+- name: Wait for services to start
+  service_facts:
+  register: services 
+  until: services.ansible_facts.services['slurmctld.service'].state == 'running'
+  retries: 10
+  delay: 5
 
 - name: Define the default slurm account
   shell: |
