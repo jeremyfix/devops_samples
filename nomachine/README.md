@@ -14,24 +14,44 @@ You need to have vagrant as well as a provisionner installed. On a ubuntu host, 
 
 # Installation
 
+## Booting the cluster
+
 To start the cluster :
 
 ```
 vagrant up
 ```
 
-For some reasons, during the ansible playbook the creation of the slurm accoutn failed because the slurmd and slurmdbd services were not running ... even if the playbook contains the notify to the handlers to restart these services !
+To check everything works, you can log to the SLURM master node and book a node :
+
+```
+localhost:~$ vagrant ssh master
+vagrant@master:~$ sinfo
+PARTITION AVAIL  TIMELIMIT  NODES  STATE NODELIST 
+cpupart*     up    4:00:00      1   idle node1
+
+vagrant@master:~$ srun --pty bash
+vagrant@node1:~$ 
+```
+
+You can then close your session by exiting the two ssh connections (to node1 and then to master).
+
+The critical point is the sinfo which should output the state `idle` for the node. And finally note the last command brings your user to `node1`.
+
+## Making an allocation
+
+We now need to book a node and the configuration of the cluster will start and allow the user to the nxserver.
+
+```
+localhost:~$ vagrant ssh master
+vagrant@master:~$ srun --pty bash
+vagrant@node1:~$ 
+```
+
+you should keep that terminal to keep your session alive.
 
 
+# TODO
 
-I also had to manually fill in the slurm.conf specifications of the compute nodes given what I saw in the slurmd.log on the compute node. Is it possible to specify to vagrant how many CPUs to use ?
+NoMachine was not working out of the box; some weird characters were displayed when the session opeoned. Is that due to missing window manager ?
 
-Now I see the node1 running and idle; 
-
-Next step :  define a common user (the vagrant one ?) able to ssh from the master to node 1
-
-sudo sacctmgr add account demoaccount Description="Demo account"
-sudo sacctmgr create user name=vagrant DefaultAccount=demoaccount
-
-
-almost running : need to script the vagrant password free ssh key ; and also check that the slurm-taskprolog is no more complaining when runn srun --pty bash

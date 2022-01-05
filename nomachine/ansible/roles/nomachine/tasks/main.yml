@@ -1,0 +1,13 @@
+# Apparmor config file
+
+- name: Install NoMachine
+  apt:
+      deb: https://download.nomachine.com/download/7.7/Linux/nomachine_7.7.4_1_amd64.deb
+
+- name: Copy NoMachine config file
+  copy: src=usr/NX/etc/node.cfg dest=/usr/NX/etc/node.cfg owner=nx group=nx mode=0644
+
+- name: Copy apparmor config file
+  copy: src=etc/apparmor.d/tunables/home.d/ubuntu dest=/etc/apparmor.d/tunables/home.d/ubuntu owner=root group=root mode=0644
+  notify:
+    - Restart apparmor

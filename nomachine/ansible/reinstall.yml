@@ -17,3 +17,4 @@
       - slurm.common
       - slurm
       - slurm.compute
+      - nomachine

@@ -1,3 +1,101 @@
 #!/bin/bash
+rm epilog.txt
+LOG_FILE=epilog.txt
 
+log() {
+	echo "[EPILOG] $1" >> $LOG_FILE
+}
+
+# Note: $SLURM_JOB_PARTITION is not available in the epilog
+log "**** Epilog stats *********"
+log "User $SLURM_JOB_USER, on partition $SLURM_JOB_PARTITION, Job $SLURM_JOB_ID "
+
+#recup info partition du job
+SLURM_PARTITION_JOB=$(scontrol show job $SLURM_JOB_ID  | grep Partition | awk '{print $1}' | cut -d= -f2)
+SLURM_NODELIST_JOB=$(scontrol show job $SLURM_JOB_ID  | grep NodeList | awk '{print $1}' | cut -d= -f2)
+SLURM_BATCH_HOST_JOB=$(scontrol show job $SLURM_JOB_ID  | grep BatchHost | awk '{print $1}' | cut -d= -f2)
+TYPE_GRAPHIQUE=g
+ALLOCATION_TYPE=NON_GRAPHIQUE
+STATUS_NOMACHINE=""
+NODE=$(hostname)
+log "scontrol : partition $SLURM_PARTITION_JOB BatchHost   $SLURM_BATCH_HOST_JOB nodelist $SLURM_NODELIST_JOB "
+
+
+#####################################################################
+# NoMachine sessions
+#TODO: Stop any nomachine session run by this user
+log "****NOMACHINE SESSIONS*********"
+log "Terminating the nomachine sessions of $SLURM_JOB_USER"
+active_sessions=`/usr/NX/bin/nxserver --list $SLURM_JOB_USER | tail +5 | head -n -1 | awk '{print $4}' | tr '\n' ' '`
+log "sessions actives $SLURM_JOB_USER : $active_sessions"
+if [ "$active_sessions" != "" ]
+then
+	log "User $SLURM_JOB_USER had NoMachine sessions $active_sessions"
+#	/usr/NX/bin/nxserver --list $SLURM_JOB_USER | tail +5 | head -n -1 | awk '{print $4}' | xargs /usr/NX/bin/nxserver --terminate
+			/usr/NX/bin/nxserver --terminate $SLURM_JOB_USER
+	log "User $SLURM_JOB_USER terminated  NoMachine sessions "
+
+else
+	log "User $SLURM_JOB_USER had no NoMachine active session"
+fi
+
+#disable the user from opening a nomachine session
+log "Nxserver disabling of $SLURM_JOB_USER"
+/usr/NX/bin/nxserver --userdisable $SLURM_JOB_USER
+
+# NoMachine sessions
+#####################################################################
+active_sessions_node=$(/usr/NX/bin/nxserver --list | grep localhost)
+nbr_active_sessions_node=$(/usr/NX/bin/nxserver --list | grep localhost | wc -l )
+if [ "$ALLOCATION_TYPE" == "NOMACHINE" ] &&  [ "$nbr_active_sessions_node" = 0 ]
+then
+        #if the nomachine server is  running and no other sessions, we stop it
+		/etc/NX/nxserver --stop
+fi
+STATUS_NOMACHINE=$(systemctl status nxserver | grep Active: );
+log "NXSERVER statut end  epilog   : $STATUS_NOMACHINE sur $NODE"
+
+# That's all folks
+
+log "****"
+log "*******CLEAN si NOMACHINE***"
+#####################################################################
+# This script will kill any user processes on a node when the last
+# SLURM job there ends. For example, if a user directly logs into
+# an allocated node SLURM will not kill that process without this
+# script being executed as an epilog.
+#
+# SLURM_BIN can be used for testing with private version of SLURM
+#SLURM_BIN="/usr/local/bin/"
+
+if [ x$SLURM_UID = "x" ] ; then
+	exit 0
+fi
+if [ x$SLURM_JOB_ID = "x" ] ; then
+		exit 0
+fi
+
+#
+# Don't try to kill user root or system daemon jobs
+#
+if [ $SLURM_UID -lt 100 ] ; then
+	exit 0
+fi
+
+job_list=`${SLURM_BIN}squeue --noheader --format=%A --user=$SLURM_UID --node=localhost`
+for job_id in $job_list
+do
+if [ $job_id -ne $SLURM_JOB_ID ] ; then
+	exit 0
+fi
+done
+
+#
+# No other SLURM jobs, purge all remaining processes of this user
+#
+
+listepgrep=$(pgrep -l -u  $SLURM_JOB_USER)
+log "clean listepgrep $SLURM_JOB_USER: $listepgrep "
+log "clean pkill -KILL -U $SLURM_UID"
+pkill -KILL -U $SLURM_UID
 exit 0
