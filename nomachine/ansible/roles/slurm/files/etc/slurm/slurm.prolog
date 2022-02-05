@@ -9,19 +9,17 @@ log() {
 log "*** Prolog start ********"
 log "User $SLURM_JOB_USER, on partition $SLURM_JOB_PARTITION, Job $SLURM_JOB_ID "
 
+rm /home/$SLURM_JOB_USER/slurm.info
+touch /home/$SLURM_JOB_USER/slurm.info
 
-/etc/NX/nxserver --startup
+log "Creating /home/$SLURM_JOB_USER/slurm.info"
+
+echo $SLURM_JOB_USER > /home/$SLURM_JOB_USER/slurm.info
+echo $SLURM_JOB_ID >> /home/$SLURM_JOB_USER/slurm.info 
+
+#echo 1 >> /sys/fs/cgroup/cpuset/slurm/uid_1000/job_$SLURM_JOB_ID/cgroup.procs
+# /etc/NX/nxserver --startup
 
 # Authorize the user to open a nomachine session
 log "Nxserver enabling of $SLURM_JOB_USER"
 /usr/NX/bin/nxserver --userenable $SLURM_JOB_USER
-active_sessions=`/usr/NX/bin/nxserver --list $SLURM_JOB_USER | tail +5 | head -n -1 | awk '{print $4}' | tr '\n' ' '`
-log "Nomachine active sessions $SLURM_JOB_USER : $active_sessions"
-
-STATUS_NOMACHINE=$(systemctl status nxserver | grep Active: );
-log "NXSERVER status      : $STATUS_NOMACHINE sur $NODE"
-
-# NoMachine sessions
-#####################################################################
-active_sessions_node=$(/usr/NX/bin/nxserver --list | grep localhost)
-log "sessions nomachine localhost nxserver actives on $NODE : $active_sessions_node"
