@@ -10,7 +10,8 @@ echo "Nxnode pid $ppid"
 # -o to show only what matches
 # -P for Perl
 # in the regexp : \K to not show what precedes it
-nomachine_login=`cat /proc/$ppid/cmdline | grep -a -o -P -e "--user\K\w+"`
+# the "." because there is something there which is not a space
+nomachine_login=`cat /proc/$ppid/cmdline | grep -a -o -P -e "--user.\K\w+"`
 echo "NoMachine login $nomachine_login"
 
 #TODO:
@@ -28,7 +29,7 @@ echo "NoMachine login $nomachine_login"
 slurmid=`sed -n '2p' /home/$nomachine_login/.slurm.info`
 echo "Slurm id $slurmid"
 
-uid=`id -i $nomachine_login`
+uid=`id -u $nomachine_login`
 echo "User id $uid"
 
 #TODO: Check the file /uid_$uid/job_$slurmid/cgroup.procs exists
