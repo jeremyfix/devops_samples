@@ -6,7 +6,11 @@ ppid=`grep '^PPid:' "/proc/$$/status" | cut -f 2`
 echo "Nxnode pid $ppid"
 
 # Retrieving the unix user name
-nomachine_login=`echo /proc/$ppid/cmdline | grep -oP "\-\-user\s+\K\w+"`
+# --text because /proc/$ppid/cmdline is considered as binary (?!)
+# -o to show only what matches
+# -P for Perl
+# in the regexp : \K to not show what precedes it
+nomachine_login=`cat /proc/$ppid/cmdline | grep --text -oP "\-\-user\s+\K\w+"`
 echo "NoMachine login $nomachine_login"
 
 #TODO:
