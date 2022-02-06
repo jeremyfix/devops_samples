@@ -1,10 +1,17 @@
-# NoMachine installation 
+# NoMachine install and configuration
 - name: Install NoMachine
   apt:
-      deb: https://download.nomachine.com/download/7.7/Linux/nomachine_7.7.4_1_amd64.deb
+      deb: https://download.nomachine.com/download/7.8/Linux/nomachine_7.8.2_1_amd64.deb
 
-- name: Copy NoMachine config file
+- name: Copy NoMachine node.cfg file
   copy: src=usr/NX/etc/node.cfg dest=/usr/NX/etc/node.cfg owner=nx group=nx mode=0644
+  notify:
+    - Restart nomachine
+
+- name: Copy NoMachine server.cfg file
+  copy: src=usr/NX/etc/server.cfg dest=/usr/NX/etc/server.cfg owner=nx group=nx mode=0644
+  notify:
+    - Restart nomachine
 
 - name: Copy NoMachine set_slurm.sh
   copy: src=etc/set_slurm.sh dest=/etc/set_slurm.sh owner=root group=root mode=0500
