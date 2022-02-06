@@ -1,3 +1,6 @@
 ---
 - name: Restart apparmor
   service: name=apparmor state=restarted
+
+- name: Restart nomachine
+  service: name=nxserver state=restarted
