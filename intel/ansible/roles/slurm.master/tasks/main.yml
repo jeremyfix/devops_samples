@@ -1,0 +1,81 @@
+# Install dependencies
+
+- name: Install building utility
+  apt:
+    pkg:
+      - libmunge-dev
+      - mariadb-server
+      - libmariadbd-dev
+      - checkinstall
+      - python3-pymysql
+    state: present
+    update_cache: true
+
+# Mysql configuration
+
+- name: Create the mysql user
+  shell: |
+      mysql --execute="create database slurm_acct_db;"
+      mysql --execute="grant all on slurm_acct_db.* TO 'slurm'@'localhost' identified by 'slurmpass' with grant option;"
+  
+# Slurm configuration files
+
+- name: Copy slurm gpu configuration file
+  copy: src=etc/slurm/slurmdbd.conf dest=/etc/slurm/slurmdbd.conf owner=root group=root mode=0644
+  notify:
+    - Restart slurmdbd.service
+
+# Slurm service files
+
+- name: Copy slurmd service file
+  copy: src=lib/systemd/system/{{ item }} dest=/lib/systemd/system/{{ item }} owner=root group=root mode=0644
+  notify:
+    - Restart {{ item }}
+  loop:
+    - slurmdbd.service
+    - slurmctld.service
+
+- name: Create symbolic link to service file
+  file:
+    src: /lib/systemd/system/{{ item }}
+    dest: /etc/systemd/system/multi-user.target.wants/{{ item }}
+    owner: root
+    group: root
+    state: link
+  notify:
+    - Restart {{ item }}
+  loop:
+    - slurmdbd.service
+    - slurmctld.service
+
+- name: Enable slurm services
+  service:
+    name: "{{ item }}.service"
+    enabled: yes
+  loop:
+    - munge
+    - mariadb
+    - slurmdbd
+    - slurmctld
+
+- name: Start the slurm services
+  service:
+      name: "{{ item }}"
+      state: started
+  loop: 
+    - munge
+    - mariadb
+    - slurmdbd
+    - slurmctld
+
+- name: Wait for services to start
+  service_facts:
+  register: services 
+  until: services.ansible_facts.services['slurmctld.service'].state == 'running'
+  retries: 10
+  delay: 5
+
+- name: Define the default slurm account
+  shell: |
+      sacctmgr add account demoaccount Description="Demo account" -i
+  ignore_errors: yes

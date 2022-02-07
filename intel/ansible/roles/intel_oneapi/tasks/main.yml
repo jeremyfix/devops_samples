@@ -1,0 +1,23 @@
+# Install the INTEL repository
+
+# Note: with apt-key, I got an issue, maybe due to the dearmor ?
+- name: Get and dearmor the Intel GPG Key
+  shell: wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor > /usr/share/keyrings/oneapi-archive-keyring.gpg
+  become: True
+
+- name: Install the Intel One API repostory
+  apt_repository: 
+      repo: deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main 
+      filename: oneAPI
+
+- name: Install intel basekit
+  apt:
+   pkg:
+       - pkgconf
+       - python-is-python3
+       - intel-basekit
+       - intel-hpckit
+       - intel-aikit
+   state: present
+   update_cache: true
+
