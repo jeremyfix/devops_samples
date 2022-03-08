@@ -1,0 +1,5 @@
+[slurm_hosts]
+master
+
+[compute_hosts]
+node1
