@@ -39,3 +39,16 @@ The critical point is the sinfo which should output the state `idle` for the nod
 ## Connecting to open on demand
 
 **TBD**
+
+## Progress
+
+For now , blocking on
+
+```
+TASK [osc.open_ondemand : build the project (this will take some time)] ********
+ASYNC POLL on master: jid=958051907056.25870 started=1 finished=0
+ASYNC FAILED on master: jid=958051907056.25870
+fatal: [master]: FAILED! => {"ansible_job_id": "958051907056.25870", "changed": true, "cmd": "rake build -mj$(nproc) > build.out 2>&1", "delta": "0:03:09.820572", "end": "2022-03-08 18:56:25.775190", "finished": 1, "msg": "non-zero return code", "rc": 1, "results_file": "/home/vagrant/.ansible_async/958051907056.25870", "start": "2022-03-08 18:53:15.954618", "started": 1, "stderr": "", "stderr_lines": [], "stdout": "", "stdout_lines": []}
+```
+
+but where is this build.out file stored  to access some info ?
