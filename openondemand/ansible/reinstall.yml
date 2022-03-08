@@ -17,3 +17,42 @@
   become: true
   roles:
       - slurm.compute
+
+- hosts:
+    - slurm_master
+  roles:
+      - osc.open_ondemand
+  vars:
+      install_from_src: true
+      clusters:
+          mydce:
+              v2:
+                  metadata:
+                      title: My DCE
+                  login:
+                      host: master
+                  job:
+                      adapter: slurm
+      ood_install_apps:
+          jupyter:
+              repo: https://github.com/OSC/bc_example_jupyter.git
+      ood_apps:
+          bc_desktop:
+              title: "xfce desktop"
+              cluster: "My DCE cluster"
+              form:
+                  - desktop
+                  - hours
+              attributes:
+                  hours:
+                      value: 1
+                      desktop: "xfce"
+                      submit: |
+                          ---
+                      script:
+                          native:
+                              - "-t"
+                              - "<%= '%02d:00:00' % hours %>"
+                          files:
+                              env:
+                                  ood_shell: /bin/bash
