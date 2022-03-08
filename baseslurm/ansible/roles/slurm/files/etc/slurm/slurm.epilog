@@ -1,0 +1,7 @@
+#!/bin/bash
+
+listepgrep=$(pgrep -l -u  $SLURM_JOB_USER)
+log "clean listepgrep $SLURM_JOB_USER: $listepgrep "
+log "clean pkill -KILL -U $SLURM_UID"
+pkill -KILL -U $SLURM_UID
+exit 0

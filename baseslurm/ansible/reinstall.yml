@@ -1,0 +1,19 @@
+- hosts:
+    - slurm_hosts
+  become: true
+  roles:
+    - slurm.common
+    - slurm
+
+- hosts:
+    - slurm_master
+  become: true
+  roles:
+    - slurm.master
+    - slurm.user
+
+- hosts:
+    - compute_nodes    
+  become: true
+  roles:
+      - slurm.compute

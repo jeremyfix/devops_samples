@@ -1,0 +1,34 @@
+# Slurm configuration
+
+- name: Create slurm directories if they do not exist
+  file:
+    path: /etc/slurm
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Create slurm directories if they do not exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: slurm
+    group: slurm
+  loop:
+    - /var/log/slurm
+    - /var/spool/slurm
+    - /var/spool/slurm/slurmd
+    - /var/spool/slurm/slurmctld
+
+- name: Copy slurm configuration file
+  copy: src=etc/slurm/slurm.conf dest=/etc/slurm/slurm.conf owner=root group=root mode=0644
+
+- name: Copy slurm prolog file
+  copy: src=etc/slurm/slurm.prolog dest=/etc/slurm/slurm.prolog owner=root group=root mode=0755
+
+- name: Copy slurm taskprolog file
+  copy: src=etc/slurm/slurm.taskprolog dest=/etc/slurm/slurm.taskprolog owner=root group=root mode=0755
+
+- name: Copy slurm epilog file
+  copy: src=etc/slurm/slurm.epilog dest=/etc/slurm/slurm.epilog owner=root group=root mode=0755
