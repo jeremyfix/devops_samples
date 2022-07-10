@@ -1,7 +1,7 @@
 # NoMachine install and configuration
 - name: Install NoMachine
   apt:
-      deb: https://download.nomachine.com/download/7.8/Linux/nomachine_7.8.2_1_amd64.deb
+      deb: https://download.nomachine.com/download/7.10/Linux/nomachine_7.10.1_1_amd64.deb
 
 - name: Copy NoMachine node.cfg file
   copy: src=usr/NX/etc/node.cfg dest=/usr/NX/etc/node.cfg owner=nx group=nx mode=0644
