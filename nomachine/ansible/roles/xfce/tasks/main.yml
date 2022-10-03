@@ -1,0 +1,11 @@
+- name: Install lightm
+  apt:
+      name: lightdm
+      state: present
+      update_cache: true
+
+- name: Install xfce4
+  apt:
+      name: xfce4
+      state: present
+      update_cache: true
