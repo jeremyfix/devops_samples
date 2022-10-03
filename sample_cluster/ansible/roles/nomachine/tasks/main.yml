@@ -1,0 +1,26 @@
+# NoMachine install and configuration
+- name: Install NoMachine
+  apt:
+      deb: https://download.nomachine.com/download/7.10/Linux/nomachine_7.10.1_1_amd64.deb
+
+- name: Copy NoMachine node.cfg file
+  copy: src=usr/NX/etc/node.cfg dest=/usr/NX/etc/node.cfg owner=nx group=nx mode=0644
+  notify:
+    - Restart nomachine
+
+- name: Copy NoMachine server.cfg file
+  copy: src=usr/NX/etc/server.cfg dest=/usr/NX/etc/server.cfg owner=nx group=nx mode=0644
+  notify:
+    - Restart nomachine
+
+- name: Copy NoMachine set_slurm.sh
+  copy: src=etc/set_slurm.sh dest=/etc/set_slurm.sh owner=root group=root mode=0500
+
+- name: Copy NoMachine pam.d nx
+  copy: src=etc/pam.d/nx dest=/etc/pam.d/nx owner=root group=root mode=0644
+
+# Apparmor config file
+- name: Copy apparmor config file
+  copy: src=etc/apparmor.d/tunables/home.d/ubuntu dest=/etc/apparmor.d/tunables/home.d/ubuntu owner=root group=root mode=0644
+  notify:
+    - Restart apparmor

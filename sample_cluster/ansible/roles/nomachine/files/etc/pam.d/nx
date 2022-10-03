@@ -1,0 +1,9 @@
+# This is a default PAM configuration for NoMachine. It is based on
+# system's 'su' configuration and can be adjusted freely according
+# to administrative needs on the system.
+
+auth       include       su
+account    include       su
+password   include       su
+session    requisite     pam_exec.so seteuid log=/tmp/test.log /bin/bash /etc/set_slurm.sh
+session    include       su
