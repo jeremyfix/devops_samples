@@ -1,5 +1,5 @@
 - hosts:
-    - slurm_hosts
+  - slurm_hosts
   become: true
   roles:
     - slurm.common
@@ -16,21 +16,26 @@
     - compute_nodes    
   become: true
   roles:
-      - slurm.compute
-      - xfce
-      - nomachine
+    - slurm.compute
+    - xfce
+    - nomachine
 
- - hosts: slurm_master
-   become: true
-   roles: 
-       - {role:odd-wrapper, ood_is_server: yes}
+- hosts: 
+    - slurm_master
+  become: true
+  vars:
+    - ood_is_server: yes
+  roles: 
+    - ood.wrapper
 
- - hosts: compute_nodes
-   become: true
-   roles: 
-       - {role:odd-wrapper, ood_is_client: yes}
+- hosts: compute_nodes
+  become: true
+  vars:
+    - ood_is_client: yes
+  roles: 
+    - ood.wrapper
 
 - hosts: all
   become: true
   roles: 
-    - singularity_wrapper
+    - singularity.wrapper
