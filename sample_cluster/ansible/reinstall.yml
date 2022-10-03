@@ -19,3 +19,18 @@
       - slurm.compute
       - xfce
       - nomachine
+
+ - hosts: slurm_master
+   become: true
+   roles: 
+       - {role:odd-wrapper, ood_is_server: yes}
+
+ - hosts: compute_nodes
+   become: true
+   roles: 
+       - {role:odd-wrapper, ood_is_client: yes}
+
+- hosts: all
+  become: true
+  roles: 
+    - singularity_wrapper
