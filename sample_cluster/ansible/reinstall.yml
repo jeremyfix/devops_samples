@@ -1,9 +1,9 @@
-- hosts:
-  - slurm_hosts
+- hosts: all
   become: true
   roles:
     - slurm.common
     - slurm
+    - singularity.wrapper
 
 - hosts:
     - slurm_master
@@ -35,7 +35,3 @@
   roles: 
     - ood.wrapper
 
-- hosts: all
-  become: true
-  roles: 
-    - singularity.wrapper

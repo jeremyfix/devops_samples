@@ -105,7 +105,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       destination: "/tmp/slurm_20.02.3-1_amd64.deb"
     front.vm.provision "shell",
       inline: "mkdir -p /opt/ansible/sources; mv /tmp/libhwloc5_1.11.9-1_amd64.deb /tmp/slurm_20.02.3-1_amd64.deb /opt/ansible/sources/"
-    # front.vm.provision "shell", inline:$ansible_setup_script
+    front.vm.provision "shell", inline:$ansible_setup_script
 
     front.vm.provision :ansible_local do |ansible|
       ansible.playbook = "ansible/reinstall.yml"
