@@ -6,6 +6,17 @@ MASTER_IMAGE = "ubuntu/focal64"
 NODE_IMAGE = "ubuntu/focal64"
 NODE_COUNT = 1
 
+$ansible_setup_script = <<-SCRIPT
+
+#!/bin/bash --init-file
+roles_path="/vagrant/ansible/roles/galaxy"
+collections_path="/vagrant/ansible/collections"
+
+cd /vagrant/ansible
+ansible-galaxy collection install -p "${collections_path}" --force -r "roles/requirements.yml" >/dev/null
+ansible-galaxy role install -p "${roles_path}" --force -r "roles/requirements.yml" >/dev/null
+SCRIPT
+
 $hostscript = <<-SCRIPT
 cp /etc/hosts /root && \
 echo '192.168.50.2 front' >> /etc/hosts
@@ -23,6 +34,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     master.vm.box = MASTER_IMAGE
     master.vm.hostname = "master"
     master.vm.network "private_network", ip:"192.168.50.3"
+    master.vm.provider :virtualbox do |vb|
+      vb.cpus = 4
+      vb.memory = 4096
+    end
     # Provision the ssh key
     master.vm.provision "file",
       source: "./id_rsa", 
@@ -90,6 +105,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       destination: "/tmp/slurm_20.02.3-1_amd64.deb"
     front.vm.provision "shell",
       inline: "mkdir -p /opt/ansible/sources; mv /tmp/libhwloc5_1.11.9-1_amd64.deb /tmp/slurm_20.02.3-1_amd64.deb /opt/ansible/sources/"
+    # front.vm.provision "shell", inline:$ansible_setup_script
 
     front.vm.provision :ansible_local do |ansible|
       ansible.playbook = "ansible/reinstall.yml"
@@ -97,6 +113,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       ansible.install == true
       ansible.inventory_path = "inventory"
       ansible.limit="all"
+      ansible.galaxy_roles_path = "ansible/roles/galaxy"
     end
   end
 

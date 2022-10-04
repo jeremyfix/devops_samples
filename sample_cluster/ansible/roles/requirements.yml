@@ -1,0 +1,4 @@
+---
+roles:
+- src: https://github.com/OSC/ood-ansible.git
+  version: 'v2.0.6'
