@@ -25,6 +25,7 @@
   become: true
   vars:
     - ood_is_server: yes
+    - install_open_ondemand: yes
   roles: 
     - ood.wrapper
 
@@ -32,6 +33,7 @@
   become: true
   vars:
     - ood_is_client: yes
+    - install_open_ondemand: yes
   roles: 
     - ood.wrapper
 
