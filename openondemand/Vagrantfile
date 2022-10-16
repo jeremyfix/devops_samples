@@ -94,10 +94,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       destination: "/tmp/slurm_20.02.3-1_amd64.deb"
     front.vm.provision "shell",
       inline: "mkdir -p /opt/ansible/sources; mv /tmp/libhwloc5_1.11.9-1_amd64.deb /tmp/slurm_20.02.3-1_amd64.deb /opt/ansible/sources/"
-
-    front.vm.provision "shell",
-      inline: "ansible-galaxy install osc.open_ondemand"
-
+    front.vm.provision "shell", 
+      inline: <<-SHELL
+              apt-get update --quiet
+              apt-get install -y --quiet ansible 
+              ansible-galaxy install osc.open_ondemand
+              ansible-galaxy collection install community.general 
+    SHELL
     front.vm.provision :ansible_local do |ansible|
       ansible.playbook = "ansible/reinstall.yml"
       ansible.config_file = "ansible/etc/ansible.cfg"
