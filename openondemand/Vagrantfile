@@ -44,6 +44,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # Make the hosts file
     master.vm.provision "shell", inline: $hostscript
+
+    # Set port forward to access the services on the master
+    config.vm.network "forwarded_port", guest: 80, host: 8080, auto_correct: true
+    config.vm.network "forwarded_port", guest: 443, host: 8081, auto_correct: true
+
   end
 
   # Define the compute nodes
@@ -94,13 +99,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       destination: "/tmp/slurm_20.02.3-1_amd64.deb"
     front.vm.provision "shell",
       inline: "mkdir -p /opt/ansible/sources; mv /tmp/libhwloc5_1.11.9-1_amd64.deb /tmp/slurm_20.02.3-1_amd64.deb /opt/ansible/sources/"
-    front.vm.provision "shell", 
-      inline: <<-SHELL
-              apt-get update --quiet
-              apt-get install -y --quiet ansible 
-              ansible-galaxy install osc.open_ondemand
-              ansible-galaxy collection install community.general 
-    SHELL
     front.vm.provision :ansible_local do |ansible|
       ansible.playbook = "ansible/reinstall.yml"
       ansible.config_file = "ansible/etc/ansible.cfg"

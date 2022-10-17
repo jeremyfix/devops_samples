@@ -1,4 +1,8 @@
 ---
+collections:
+- name: community.general
+  version: 4.8.5
+
 roles:
 - src: https://github.com/OSC/ood-ansible.git
   version: 'v2.0.6'

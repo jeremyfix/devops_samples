@@ -34,6 +34,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     master.vm.box = MASTER_IMAGE
     master.vm.hostname = "master"
     master.vm.network "private_network", ip:"192.168.50.3"
+    # Forward the port to connect on OpenOnDemand
+    config.vm.network "forwarded_port", guest: 80, host: 8080, auto_correct: true
+    config.vm.network "forwarded_port", guest: 9050, host: 9050, auto_correct: true
     master.vm.provider :virtualbox do |vb|
       vb.cpus = 4
       vb.memory = 4096
@@ -53,8 +56,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     SHELL
     # Install avahi to allow to ping the nodes 
     master.vm.provision "shell", inline: <<-SHELL
-            apt update --quiet
-            apt install -y --quiet avahi-daemon avahi-utils libnss-mdns
+            apt-get update --quiet
+            apt-get install -y --quiet avahi-daemon avahi-utils libnss-mdns
     SHELL
 
     # Make the hosts file
@@ -87,8 +90,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       # Install avahi to allow to ping the nodes 
       node.vm.provision "shell", 
         inline: <<-SHELL
-                apt update --quiet
-                apt install -y --quiet avahi-daemon avahi-utils libnss-mdns
+                apt-get update --quiet
+                apt-get install -y --quiet avahi-daemon avahi-utils libnss-mdns
       SHELL
 
       # Make the hosts file
@@ -109,6 +112,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       destination: "/tmp/slurm_20.02.3-1_amd64.deb"
     front.vm.provision "shell",
       inline: "mkdir -p /opt/ansible/sources; mv /tmp/libhwloc5_1.11.9-1_amd64.deb /tmp/slurm_20.02.3-1_amd64.deb /opt/ansible/sources/"
+      # Install avahi to allow to ping the nodes 
+    front.vm.provision "shell", 
+      inline: <<-SHELL
+              apt-get update --quiet
+              apt-get install -y --quiet ansible 
+    SHELL
     front.vm.provision "shell", inline:$ansible_setup_script
 
     front.vm.provision :ansible_local do |ansible|

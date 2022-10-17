@@ -68,12 +68,12 @@
     - slurmdbd
     - slurmctld
 
-- name: Wait for services to start
-  service_facts:
-  register: services 
-  until: services.ansible_facts.services['slurmctld.service'].state == 'running'
-  retries: 10
-  delay: 5
+# - name: Wait for services to start
+#   service_facts:
+#   register: services 
+#   until: services.ansible_facts.services['slurmctld.service'].state == 'running'
+#   retries: 10
+#   delay: 30
 
 - name: Define the default slurm account
   shell: |
