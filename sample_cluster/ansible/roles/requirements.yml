@@ -5,7 +5,7 @@ collections:
 
 roles:
 - src: https://github.com/OSC/ood-ansible.git
-  version: 'v2.0.6'
+  version: 'v2.0.7'
 
 - src: abims_sbr.singularity
   version: 3.7.1-4
