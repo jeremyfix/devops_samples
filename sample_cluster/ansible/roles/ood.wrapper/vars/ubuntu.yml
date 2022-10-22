@@ -1,4 +1,4 @@
-install_from_src: true
+install_from_src: false
 
 ood_apache_service_name: apache2
 ood_htpasswd_file: /etc/apache2/.htpasswd
