@@ -17,14 +17,6 @@
     path: "{{ ood_source_dir }}"
     state: absent
 
-- name: enable httpd listen port in SELinux
-  command: semanage port -m -t http_port_t -p tcp {{ httpd_port }}
-  when: ansible_os_family == 'RedHat'
-
-- name: set httpd to permissive in SELinux
-  command: semanage permissive -a httpd_t
-  when: ansible_os_family == 'RedHat'
-
 - name: install Open OnDemand
   include_role:
     name: ood-ansible
@@ -62,17 +54,6 @@
     - python3-passlib
   tags:
     - configure
-  when: (ansible_distribution == "Ubuntu") or ((ansible_os_family == "RedHat") and (ansible_distribution_major_version == "8"))
-
-- name: install package dependency for htpasswd module
-  package:
-    name: "{{ item }}"
-    state: present
-  with_items:
-    - python-passlib
-  tags:
-    - configure
-  when: (ansible_os_family == "RedHat") and (ansible_distribution_major_version == "7")
 
 - name: create .htpasswd entries
   htpasswd:
@@ -91,19 +72,6 @@
   register: mod_install
   tags:
     - configure
-  when: ansible_distribution == 'Ubuntu'
-
-- name: install required apache module
-  apache2_module:
-    state: present
-    name: proxy_wstunnel
-  register: mod_install
-  environment:
-    PATH: /opt/rh/httpd24/root/usr/sbin
-    LD_LIBRARY_PATH: /opt/rh/httpd24/root/usr/lib64
-  tags:
-    - configure
-  when: ansible_os_family == 'RedHat'
 
 - name: restart apache after module install
   systemd:
