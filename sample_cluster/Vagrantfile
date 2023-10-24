@@ -19,12 +19,12 @@ SCRIPT
 
 $hostscript = <<-SCRIPT
 cp /etc/hosts /root && \
-echo '192.168.50.2 front' >> /etc/hosts
-echo '192.168.50.3 master' >> /etc/hosts
-echo '192.168.50.4 node1' >> /etc/hosts
-echo '192.168.50.5 node2' >> /etc/hosts
-echo '192.168.50.6 node3' >> /etc/hosts
-echo '192.168.50.7 node4' >> /etc/hosts
+echo '192.168.56.2 front' >> /etc/hosts
+echo '192.168.56.3 master' >> /etc/hosts
+echo '192.168.56.4 node1' >> /etc/hosts
+echo '192.168.56.5 node2' >> /etc/hosts
+echo '192.168.56.6 node3' >> /etc/hosts
+echo '192.168.56.7 node4' >> /etc/hosts
 SCRIPT
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
@@ -33,7 +33,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.define "master" do |master|
     master.vm.box = MASTER_IMAGE
     master.vm.hostname = "master"
-    master.vm.network "private_network", ip:"192.168.50.3"
+    master.vm.network "private_network", ip:"192.168.56.3"
     # Forward the port to connect on OpenOnDemand
     config.vm.network "forwarded_port", guest: 80, host: 8080, auto_correct: true
     config.vm.network "forwarded_port", guest: 9050, host: 9050, auto_correct: true
@@ -69,7 +69,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.define "node#{i}" do |node|
       node.vm.box = NODE_IMAGE
       node.vm.hostname = "node#{i}"
-      node.vm.network "private_network", ip:"192.168.50.#{i+3}"
+      node.vm.network "private_network", ip:"192.168.56.#{i+3}"
       node.vm.provider :virtualbox do |vb|
         vb.cpus = 4
         vb.memory = 4096
@@ -103,7 +103,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # is installed and from which the configuration will be deployed
   config.vm.define 'front' do |front|
     front.vm.box = MASTER_IMAGE
-    front.vm.network "private_network", ip: "192.168.50.2"
+    front.vm.network "private_network", ip: "192.168.56.2"
     front.vm.provision "file",
       source:"./libhwloc5_1.11.9-1_amd64.deb", 
       destination: "/tmp/libhwloc5_1.11.9-1_amd64.deb"
